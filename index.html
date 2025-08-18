@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Yakov Cohen</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== HACKER GATE ===== -->
+  <div id="intro-screen" class="crt">
+    <div class="bezel">
+      <div class="scanlines"></div>
+      <div class="intro-wrap">
+        <div class="logo-line">[ SYS: YK-PORTAL v1.0 ]</div>
+        <pre id="typeout" class="typeout"></pre>
+        <div class="choices">
+          <button data-intent="recruit">▸ Recruit me</button>
+          <button data-intent="projects">▸ Browse projects</button>
+          <button data-intent="game">▸ Enter game zone</button>
+          <button data-intent="contact">▸ Leave a message</button>
+        </div>
+        <div class="prompt">
+          <span class="caret">$</span>
+          <input id="intent-input" type="text" placeholder="type intent and press Enter… e.g., 'projects'"/>
+        </div>
+        <div class="footer-line">
+          <span>ACCESS REQUIRES PURPOSE • use ↑/↓ (Tab) or click • press Esc to skip</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===== /HACKER GATE ===== -->
+
+  <header class="terminal-header">
+    <div class="header-glow"></div>
+    <h1>[ YAKOV COHEN // Developer ]</h1>
+    <p>status: online • node://yakovcohen • mode: portfolio</p>
+    <div class="theme-switch">
+      <button data-theme="green">green</button>
+      <button data-theme="amber">amber</button>
+      <button data-theme="cyan">cyan</button>
+    </div>
+  </header>
+
+  <canvas id="matrix-rain" aria-hidden="true"></canvas>
+
+  <main>
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="panel about-grid">
+      <div class="about-text">
+        <h2> About Me</h2>
+        <pre class="terminal-output">
+> system.query("yakov_cohen")
+
+[BOOT SEQUENCE INITIATED...]
+--------------------------------------------
+NAME .............: Cohen Yakov
+BIRTHPLACE .......: Antwerp, Belgium
+CURRENT BASE .....: Israel
+ROLE .............: Full-Stack Developer
+STATUS ...........: Father to Refael 👶
+
+[BACKGROUND]
+- Studied Electrical Engineering
+- Combat soldier (Gaza & Lebanon)
+- Transitioned into software development
+- Builder of apps, websites & digital tools
+
+[EXPERIENCE]
+- Outlier (AI) — Model Tester & Validator [Remote]
+  • Evaluate & validate LLM outputs for accuracy, safety and reliability
+  • Design task rubrics, edge-case scenarios, and golden datasets
+  • Provide structured feedback loops to improve model behavior across releases
+  Tech: Prompt design, Python, SQL/Sheets, internal eval tools
+
+- Israel Aerospace Industries (IAI) — Satellite Controller 
+  • Real-time telemetry monitoring and command uplink (TT&C)
+  • Execute health checks & maintenance maneuvers
+  • Coordinate with ground segment/RF and engineering teams
+  • Operate under strict procedures and security constraints
+  Tech: Telemetry systems, ops tooling, scripting, incident runbooks
+
+[PASSIONS]
+- Warhammer 40K (For the Emperor! ⚔️)
+- DC & Marvel universes (comics, movies, lore)
+- Exploring tech, coding, and creative problem-solving
+
+[PERSONAL NOTE]
+I combine battlefield discipline, engineering logic, 
+and geek-culture imagination to craft reliable, 
+engaging, and purposeful digital experiences.
+--------------------------------------------
+> query.complete()
+        </pre>
+      </div>
+
+      <div class="about-photo">
+        <div class="image-placeholder">[ Your Picture ]</div>
+        <div class="about-sidepanel">
+          <pre class="terminal-box">
+[ SYSTEM STATUS ]
+CPU .............. <span id="cpu-val">92%</span> coding capacity
+RAM .............. <span id="ram-val">78%</span> coffee buffer
+UPTIME ........... <span id="uptime-val">0000:00:00</span>
+CURRENT QUEST .... Full-Stack Mastery
+LOYALTY .......... For the Emperor! ⚔️
+          </pre>
+
+          <div class="terminal-box">
+            <pre>[ SKILL SCAN ]</pre>
+            <ul class="skill-meters">
+              <li><span>HTML</span>     <div class="meter" style="--val:90"></div></li>
+              <li><span>CSS</span>      <div class="meter" style="--val:78"></div></li>
+              <li><span>JS / React</span><div class="meter" style="--val:90"></div></li>
+              <li><span>Node.js</span>  <div class="meter" style="--val:80"></div></li>
+              <li><span>MongoDB</span>  <div class="meter" style="--val:70"></div></li>
+              <li><span>Combat Coding</span><div class="meter" style="--val:100"></div></li>
+            </ul>
+          </div>
+
+          <div class="terminal-box">
+            <pre>[ COMMS LINK ]</pre>
+            <ul class="link-list">
+              <li>email ..... <a href="mailto:yakovco44@gmail.com">yakovco44@gmail.com</a></li>
+              <li>github .... <a href="https://github.com/YakovCo44" target="_blank" rel="noopener">github.com/YakovCo44</a></li>
+              <li>linkedin .. <a href="https://linkedin.com/in/youruser" target="_blank" rel="noopener">linkedin.com/in/youruser</a></li>
+              <li>resume .... <a href="./assets/Yakov_Cohen_CV.pdf" download>Download CV.pdf</a></li>
+            </ul>
+            <div class="link-actions">
+              <button class="btn-terminal1" data-copy="yakovco44@gmail.com">copy email</button>
+              <a class="btn-terminal2" href="./assets/Yakov_Cohen_CV.pdf" download>download cv</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS ===== -->
+    <section id="projects" class="panel">
+      <h2>~ Projects</h2>
+      <div class="project-gallery">
+        <div class="image-placeholder">[ Project Screenshot 1 ]</div>
+        <div class="image-placeholder">[ Project Screenshot 2 ]</div>
+        <div class="image-placeholder">[ Project Screenshot 3 ]</div>
+      </div>
+    </section>
+
+    <!-- ===== GAME ===== -->
+    <section id="game" class="panel">
+        <h2>~ Orbital Code Strike</h2>
+      
+        <div class="game-wrap" id="codegame">
+          <div class="sky" id="arena-wrap" title="click to focus">
+            <!-- keep a stable coordinate space -->
+            <svg id="arena" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet">
+              <!-- beam (endpoints set in JS) -->
+              <line id="beam" class="beam" x1="0" y1="0" x2="0" y2="0"/>
+      
+              <!-- SATELLITE (right-facing, no fixed translate) -->
+              <g id="satellite" class="satellite">
+                <!-- TOP panel + strut -->
+                <rect x="24"  y="-28" width="6"  height="16" rx="2" class="sat-arm"/>
+                <rect x="12"  y="-75" width="36" height="48" rx="2" class="sat-panel"/>
+      
+                <!-- BOTTOM panel + strut -->
+                <rect x="24"  y="12"  width="6"  height="16" rx="2" class="sat-arm"/>
+                <rect x="12"  y="24"  width="36" height="48" rx="2" class="sat-panel"/>
+      
+                <!-- body centered on y=0 -->
+                <rect x="0"  y="-12" width="60" height="24" rx="3"  class="sat-body"/>
+                <rect x="8"  y="-4"  width="12" height="8"  rx="1.5" class="sat-window"/>
+      
+                <!-- nozzle + muzzle (beam exits here) -->
+                <rect x="60" y="-4" width="12" height="8" rx="2" class="sat-nozzle"/>
+                <rect x="70" y="-2" width="4"  height="4" rx="1" class="sat-muzzle"/>
+                <!-- precise emitter center (beam start) -->
+                <circle id="emitter" cx="72" cy="0" r="0.1" fill="none"/>
+      
+                <!-- SAT label (on top) -->
+                <text id="satText" class="svg-label" x="-35" y="-85">SAT: —</text>
+              </g>
+      
+              <!-- PLANET (no fixed translate) -->
+              <g id="planetGroup">
+                <text id="planetText" class="svg-label" x="0" y="-60" text-anchor="middle">TARGET: —</text>
+                <circle id="planet" class="planet" r="52" cx="0" cy="0"/>
+                <circle class="planet-glow" r="52" cx="0" cy="0"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      
+
+        <!-- HUD -->
+        <div class="hud">
+          <div class="status-row">
+            <span>planet <strong id="planetIndex">1</strong>/2</span>
+            <span>beams <strong id="beamIndex">0</strong>/5</span>
+          </div>
+
+          <div class="word-row">
+            <div id="targetWord" class="word">
+              <span class="typed"></span><span class="remaining"></span>
+            </div>
+            <input id="gameInput" class="game-input"
+                   autocomplete="off" autocapitalize="off"
+                   spellcheck="false" placeholder="type here…"/>
+          </div>
+
+          <div class="bar"><div id="barFill"></div></div>
+          <div id="msg" class="msg">Type the word to charge the laser.</div>
+        </div>
+      </div>
+
+      <!-- HIRED overlay -->
+      <div id="hiredOverlay" class="hired-overlay" hidden>
+        <div class="hired-card">
+          <div class="big">SO… AM I HIRED?</div>
+          <div class="small">2 planets neutralized. Mission complete.</div>
+          <div class="actions">
+            <a class="btn-terminal" href="mailto:yakovco44@gmail.com">email me</a>
+            <button id="playAgain" class="btn-terminal">play again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="terminal-footer">
+    <p>© 2025 Yakov Cohen • Built with ☕ some 🐛 and a lot of 🔥</p>
+  </footer>
+
+  <!-- ACCESS GRANTED overlay -->
+  <div id="access-overlay" class="access-overlay" style="display:none">
+    <div id="access-text" class="access-text">ACCESS GRANTED</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
