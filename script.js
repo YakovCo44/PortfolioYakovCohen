@@ -1,9 +1,23 @@
-// ===== reveal panels on scroll =====
-document.addEventListener('scroll', () => {
-    const panels = document.querySelectorAll('.panel')
-    const triggerBottom = window.innerHeight * 0.8
-    panels.forEach(p => { if (p.getBoundingClientRect().top < triggerBottom) p.classList.add('visible') })
-  })
+// ===== single visible section =====
+const panels = Array.from(document.querySelectorAll('main > section.panel'))
+
+function updateActiveSection(){
+  if (!panels.length) return
+  const midY = window.innerHeight / 2
+  let best = null, bestDist = Infinity
+
+  for (const sec of panels){
+    const r = sec.getBoundingClientRect()
+    const center = r.top + r.height/2
+    const d = Math.abs(center - midY)
+    if (d < bestDist){ bestDist = d; best = sec }
+  }
+  panels.forEach(sec => sec.classList.toggle('active', sec === best))
+}
+
+document.addEventListener('scroll', updateActiveSection, { passive:true })
+window.addEventListener('resize', updateActiveSection)
+window.addEventListener('load', updateActiveSection)
   
   /* ================== HACKER GATE ================== */
   const intro = document.getElementById('intro-screen')
@@ -21,15 +35,113 @@ document.addEventListener('scroll', () => {
   async function typeLines(){ for (const l of lines){ await typeText(l,10); await wait(150) } gateInput.focus() }
   function typeText(text, speed=12){ return new Promise(res=>{ let i=0; (function tick(){ typeout.textContent += text.charAt(i); i++; i<text.length? setTimeout(tick,speed):res() })() }) }
   function wait(ms){ return new Promise(r=>setTimeout(r,ms)) }
-  async function showAccessGranted(){ if(!accessOverlay) return; accessOverlay.classList.remove('hidden','poweroff'); accessText.classList.remove('fadein'); accessOverlay.style.display='grid'; await wait(20); accessText.classList.add('fadein'); await wait(2000) }
-  function playOverlayPowerOff(){ return new Promise(res=>{ accessOverlay.classList.add('poweroff'); accessOverlay.addEventListener('animationend', function h(){ accessOverlay.removeEventListener('animationend',h); res() }) }) }
-  async function grantAndReveal(anchorId){ await showAccessGranted(); intro.classList.add('hidden'); await playOverlayPowerOff(); accessOverlay.style.display='none'; if(anchorId){ document.getElementById(anchorId)?.scrollIntoView({behavior:'smooth',block:'start'}) } }
-  document.querySelectorAll('.choices button').forEach(btn=>btn.addEventListener('click',()=>routeIntent(btn.getAttribute('data-intent'))))
-  gateInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ routeIntent((gateInput.value||'').trim().toLowerCase()) } else if(e.key==='Escape'){ intro.classList.add('hidden') }})
-  function routeIntent(intent){ switch(intent){ case'recruit':grantAndReveal('about');break; case'projects':grantAndReveal('projects');break; case'game':grantAndReveal('game');break; case'contact':grantAndReveal('about');break; default:typeout.textContent+='\n[WARN] Unknown intent. Valid: recruit | projects | game | contact\n'; gateInput.value=''; gateInput.focus() } }
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ accessOverlay.style.display='none'; intro.classList.add('hidden') } })
-  window.addEventListener('load', typeLines)
   
+  let gateNavLock = false
+
+  async function showAccessGranted(){
+    if(!accessOverlay) return
+    accessOverlay.classList.remove('hidden','poweroff')
+    accessText.classList.remove('fadein')
+    accessOverlay.style.display='grid'
+    await wait(20)
+    accessText.classList.add('fadein')
+    await wait(2000)
+  }
+
+  function playOverlayPowerOff(){
+    return new Promise(res=>{
+      accessOverlay.classList.add('poweroff')
+      accessOverlay.addEventListener('animationend', function h(){
+        accessOverlay.removeEventListener('animationend', h)
+        res()
+      })
+    })
+  }
+
+  function detachGateListeners(){
+    document.removeEventListener('keydown', onHotkey)     // remove gate hotkeys
+  }
+
+  async function grantAndReveal(anchorId){
+    if (gateNavLock) return
+    gateNavLock = true
+  
+    await showAccessGranted()
+  
+    // jump under the overlay to avoid flicker
+    if (anchorId){
+      document.documentElement.classList.add('no-smooth')
+      document.getElementById(anchorId)?.scrollIntoView({ behavior:'auto', block:'start' })
+      document.documentElement.classList.remove('no-smooth')
+    }
+  
+    intro.classList.add('hidden')
+    detachGateListeners?.()
+    await playOverlayPowerOff()
+    accessOverlay.style.display = 'none'
+  
+    document.body.classList.remove('gate-lock')   // <- unlock scroll (critical)
+  
+    updateActiveSection?.()
+    gateNavLock = false
+  }
+  
+
+  function routeIntent(intent){
+    if(gateNavLock) return
+    switch(intent){
+      case 'recruit':  grantAndReveal('about');    break
+      case 'projects': grantAndReveal('projects'); break
+      case 'game':     grantAndReveal('game');     break
+      case 'contact':  grantAndReveal('about');    break
+      default:
+        typeout.textContent += '\n[WARN] Unknown intent. Valid: recruit | projects | game | contact\n'
+        gateInput.value = ''
+        gateInput.focus()
+    }
+  }
+
+  // wire intro buttons to routeIntent
+  document.querySelectorAll('.choices button')
+  .forEach(btn => btn.addEventListener('click', () => {
+    const intent = btn.getAttribute('data-intent')
+    routeIntent(intent)
+  }))
+
+  gateInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.stopPropagation() // keep hotkeys from double-triggering
+      const intent = (gateInput.value || '').trim().toLowerCase()
+      routeIntent(intent)
+    } else if (e.key === 'Escape') {
+      exitGateImmediate()
+    }
+  })
+  
+  function exitGateImmediate(){
+    intro.classList.add('hidden')
+    accessOverlay.style.display = 'none'
+    document.body.classList.remove('gate-lock')  // <- unlock scroll
+    detachGateListeners?.()                      // remove r/p/g/c hotkeys if present
+    updateActiveSection?.()                      // ensure one section is active
+  }
+  
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') exitGateImmediate()
+  })
+  // prevent the browser from restoring the last scroll position
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+
+  // if the page is restored from bfcache, also reset to top
+  window.addEventListener('pageshow', e => { if (e.persisted) window.scrollTo(0, 0) })
+
+  // on first load: go to top, lock scroll under the intro, then start typing
+  window.addEventListener('load', () => {
+    window.scrollTo(0, 0)
+    document.body.classList.add('gate-lock')
+    typeLines()
+  })
+
   /* ===== live status fun ===== */
   const cpuEl=document.getElementById('cpu-val'), ramEl=document.getElementById('ram-val'), upEl=document.getElementById('uptime-val')
   let upSec=0; const pad=n=>n.toString().padStart(2,'0')
@@ -48,8 +160,16 @@ document.addEventListener('scroll', () => {
   })()
   
   /* ===== hotkeys ===== */
-  document.addEventListener('keydown', e=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; const k=e.key.toLowerCase(); if(k==='r')routeIntent('recruit'); if(k==='p')routeIntent('projects'); if(k==='g')routeIntent('game'); if(k==='c')routeIntent('contact') })
-  
+    function onHotkey(e){
+      if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return
+      const k=e.key.toLowerCase()
+      if(k==='r') routeIntent('recruit')
+      if(k==='p') routeIntent('projects')
+      if(k==='g') routeIntent('game')
+      if(k==='c') routeIntent('contact')
+    }
+    document.addEventListener('keydown', onHotkey)
+
   /* ===== theme switch ===== */
   ;(function(){ const saved=localStorage.getItem('yk_theme'); if(saved) document.documentElement.className=`theme-${saved}`
     document.querySelectorAll('.theme-switch [data-theme]').forEach(btn=>btn.addEventListener('click',()=>{ const t=btn.dataset.theme; document.documentElement.className=`theme-${t}`; localStorage.setItem('yk_theme',t) }))
@@ -127,55 +247,66 @@ document.addEventListener('scroll', () => {
         const py = vh * layout.planet.y
         planetG.setAttribute('transform', `translate(${px},${py})`)
       
-        // after moving, re-link beam endpoints so it stays accurate
-        if (typeof relinkBeam === 'function') relinkBeam()
+        relinkBeam()
       }
       window.addEventListener('resize', placeEntities)
       placeEntities()
   
     // helpers
     const pick = arr => arr[Math.floor(Math.random() * arr.length)]
-    function svgPoint(el,x,y){ const pt=svg.createSVGPoint(); pt.x=x; pt.y=y; return pt.matrixTransform(el.getCTM()) }
-    function getEmitterPos(){ return svgPoint(emitter, emitter.cx.baseVal.value, emitter.cy.baseVal.value) }
-    function toLocal(el, screenPt){
-        const pt = svg.createSVGPoint()
-        pt.x = screenPt.x; pt.y = screenPt.y
-        return pt.matrixTransform(el.getCTM().inverse())
+    // ---- All points returned here are in ROOT SVG USER SPACE (viewBox units) ----
+      function toRoot(el, pt){
+        const p = svg.createSVGPoint()
+        p.x = pt.x
+        p.y = pt.y
+        // local -> screen, then screen -> root
+        const toScreen = el.getScreenCTM()
+        const screenToRoot = svg.getScreenCTM().inverse()
+        return p.matrixTransform(toScreen).matrixTransform(screenToRoot)
       }
-      function toScreen(el, localPt){
-        const pt = svg.createSVGPoint()
-        pt.x = localPt.x; pt.y = localPt.y
-        return pt.matrixTransform(el.getCTM())
+
+      function fromRoot(el, pt){
+        const p = svg.createSVGPoint()
+        p.x = pt.x
+        p.y = pt.y
+        // root -> screen, then screen -> element local
+        const rootToScreen = svg.getScreenCTM()
+        const screenToLocal = el.getScreenCTM().inverse()
+        return p.matrixTransform(rootToScreen).matrixTransform(screenToLocal)
       }
-      
-      // NEW: where the beam should hit — the planet *surface* along approach vector
-      function getPlanetSurfacePos(){
-        const muzzleScreen = getEmitterPos()
-      
-        // emitter in planet's local space (planet center is 0,0 in its local coords)
-        const muzzleLocal = toLocal(planet, muzzleScreen)
-      
-        const r = planet.r.baseVal.value
-        // vector from emitter to planet center (0,0) in planet-local coords
-        const dx = -muzzleLocal.x
-        const dy = -muzzleLocal.y
+
+      function getEmitterRoot(){
+        const cx = emitter.cx?.baseVal?.value ?? 0
+        const cy = emitter.cy?.baseVal?.value ?? 0
+        return toRoot(emitter, { x: cx, y: cy })
+      }
+
+      function getPlanetCenterRoot(){
+        const cx = planet.cx?.baseVal?.value ?? 0   // your <circle id="planet" cx="0" cy="0">
+        const cy = planet.cy?.baseVal?.value ?? 0
+        return toRoot(planet, { x: cx, y: cy })
+      }
+
+      // If you prefer hitting the *surface* instead of center:
+      function getPlanetSurfaceRoot(){
+        const a = getEmitterRoot()
+        const c = getPlanetCenterRoot()
+        const dx = c.x - a.x
+        const dy = c.y - a.y
         const len = Math.hypot(dx, dy) || 1
-        const unitX = dx / len
-        const unitY = dy / len
-      
-        // point on the circle surface in that direction
-        const surfaceLocal = { x: unitX * r, y: unitY * r }
-      
-        // back to screen coords for the beam endpoint
-        return toScreen(planet, surfaceLocal)
+        const r = planet.r.baseVal.value          // safe because we only translate groups (no scale)
+        return { x: c.x - (dx/len)*r, y: c.y - (dy/len)*r }
       }
       
       // REPLACE your old relinkBeam() with this
       function relinkBeam(){
-        const a = getEmitterPos()         // start at muzzle center
-        const b = getPlanetSurfacePos()   // end at planet surface
-        beam.setAttribute('x1', a.x); beam.setAttribute('y1', a.y)
-        beam.setAttribute('x2', b.x); beam.setAttribute('y2', b.y)
+        const a = getEmitterRoot()          // start = satellite emitter center (root space)
+        const b = getPlanetCenterRoot()     // end   = planet center (root space)
+        // If you want surface hit instead: const b = getPlanetSurfaceRoot()
+        beam.setAttribute('x1', a.x)
+        beam.setAttribute('y1', a.y)
+        beam.setAttribute('x2', b.x)
+        beam.setAttribute('y2', b.y)
       }
     window.addEventListener('resize', relinkBeam)
   

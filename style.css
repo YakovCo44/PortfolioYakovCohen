@@ -16,13 +16,70 @@ a{color:var(--ink)} a:hover{text-decoration:underline}
 .terminal-header p{margin-top:10px;color:#0c5}
 .header-glow{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,255,100,.08),transparent 60%);pointer-events:none}
 
+/* disable smooth scroll temporarily */
+html.no-smooth, html.no-smooth body { scroll-behavior: auto !important }
+
+/* prevent page from scrolling under the intro/overlay */
+body.gate-lock { overflow: hidden }
+
 /* ===== PANELS ===== */
 main{width:min(1200px,92vw);margin:0 auto}
-.panel{position:relative;margin:28px auto;padding:28px;border:1px dashed var(--ink-dim);
+
+.panel{
+  position:relative;
+  margin:28px auto;
+  padding:28px;
+  border:1px dashed var(--ink-dim);
   background:linear-gradient(to bottom right,rgba(0,255,100,.03),rgba(0,0,0,.6));
   box-shadow:inset 0 0 0 1px rgba(0,255,100,.05),0 0 24px rgba(0,255,100,.08);
-  border-radius:8px;opacity:0;transform:translateY(20px);transition:all .6s ease-in-out}
-.panel.visible{opacity:1;transform:translateY(0)}
+  border-radius:8px;
+
+  /* single-section visibility */
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(20px);
+  transition:opacity .35s ease, transform .45s ease
+}
+.panel.active{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0)
+}
+
+/* one project per row, always */
+.project-gallery.vertical{
+  display: grid;
+  grid-template-columns: 1fr;   /* single column on all widths */
+  gap: 16px;
+}
+
+/* optional: keep cards nicely centered within the panel */
+.project-gallery.vertical .project-card{
+  max-width: 1000px;
+  margin-inline: auto;
+}
+
+/* already good, but ensure whole image shows (no crop) */
+.project-card .thumb{
+  width: 100%;
+  height: auto;                 /* preserve natural aspect ratio */
+  display: block;
+  border-radius: 4px;
+  border: 1px dashed var(--ink-dim);
+  box-shadow: 0 0 12px rgba(0,255,100,.15);
+}
+
+.project-card{
+  display:flex;           /* NEW: stack children */
+  flex-direction:column;  /* caption, then image */
+}
+
+.project-card figcaption{
+  order:-1;               /* move before the image */
+  margin:0 0 8px;         /* bottom space instead of top */
+  color:#8cffb5;
+}
+
 .panel h2{font-size:clamp(18px,3vw,28px);margin-bottom:16px;color:var(--ink)}
 .panel p{color:#8cffb5}
 
